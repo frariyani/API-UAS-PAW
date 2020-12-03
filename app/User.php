@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Carbon\Carbon;  
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Database\Eloquent\Model;
 
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -51,6 +52,10 @@ class User extends Authenticatable implements MustVerifyEmail
         if(!is_null($this->attributes['updated_at'])){
             return Carbon::parse($this->attributes['updated_at'])->format('Y-m-d H:i:s');
         }
+    }
+
+    public function barangs(){
+        return $this->hasMany('App\Barang');
     }
 
     // public function userProfile(){

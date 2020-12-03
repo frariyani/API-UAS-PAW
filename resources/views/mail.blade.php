@@ -6,7 +6,9 @@
     <title>Welcome Mail</title>
 </head>
 <body>
-    <h2>Congratulation</h2>
-    <p>{{$detail['body']}} is created</p>
+    <h2>Halo, </h2>
+    <p>{{$detail['body']}}, selamat datang di CoReal!</p>
+    <p>Harap klik link dibawah ini untuk mengaktivasi email.</p>
+    <a href="{{url('api/verify', $detail['id'])}}">Link Verifikasi</a>
 </body>
 </html>

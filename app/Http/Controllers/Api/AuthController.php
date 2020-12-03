@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Auth;
 use App\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Mail;
+use App\Mail\VerificationEmail;
+use Carbon\Carbon;
 
 
 class AuthController extends Controller
@@ -30,23 +33,24 @@ class AuthController extends Controller
 
         $registrationData['password'] = Hash::make($request->password);
         $user = User::create($registrationData);
+
+        try{
+            $detail = [
+                'body' => $request->nama_user,
+                'id' => $user->id,
+            ];
+            Mail::to($request->email)->send(new VerificationEmail($detail));
+            return 'Item successfully created';
+        }catch(Exception $e){
+            //return redirect()->route('welcome.index')->with('success','Item successfully created but email was not sent');
+        }
+
+
         //User::create($request->getAttributes())->sendEmailVerificationNotification();
         return response([
             'message' => 'Register Success',
             'user' => $user,
         ],200);
-
-        $detail = 'heuheueheueh';
-        Maill::to('frs.ariyani@gmail.com')->send(new VerificationEmail($detail));
-
-        // try{
-        //     $detail = [
-        //         'body' => $request->nama_user,
-        //     ];
-            
-        // }catch(Exception $e){
-            
-        // }
     
     }
 
@@ -64,7 +68,13 @@ class AuthController extends Controller
             return response(['message' => 'Invalid Credentials'],401);
 
         $user = Auth::user();
-        $token = $user->createToken('Authentication Token')->accessToken;
+
+        if(is_null($user->email_verified_at)){
+            return response(['message' => 'Email belum diverifikasi'], 400);
+        }else{
+            $token = $user->createToken('Authentication Token')->accessToken;
+        }
+        
 
         return response([
             'message' => 'Authenticated',
@@ -79,5 +89,26 @@ class AuthController extends Controller
         return response([
             'message' => 'Logged out'
         ]);
+    }
+
+    public function verify($id){
+        $user = User::findOrFail($id);
+
+        if(is_null($user->email_verified_at)){
+            $user->email_verified_at = Carbon::now()->format('Y-m-d H:i:s');
+            if($user->save()){
+                return response([
+                    'message' => 'Berhasil diverifikasi'
+                ], 200);
+            }else{
+                return response([
+                    'message' => 'Tidak berhasil'
+                ], 400);
+            }
+        }else{
+            return response([
+                'message' => 'Email sudah diverifikasi'
+            ], 400);
+        }
     }
 }

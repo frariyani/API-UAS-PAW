@@ -31,6 +31,6 @@ class VerificationEmail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Halo gan')->view('mail');
+        return $this->subject('Aktivasi Akun')->view('mail');
     }
 }
